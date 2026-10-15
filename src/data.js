@@ -1,5 +1,9 @@
 // Edit this file to make the portfolio yours.
 
+// Until this moment visitors see the "coming soon" countdown; after it, the real site.
+// +08:00 = Philippine time. To preview the real site early, add ?preview to the URL.
+export const launchDate = '2026-10-20T22:00:00+08:00'
+
 export const profile = {
   name: 'Larry Lopez',
   handle: 'devrry',
