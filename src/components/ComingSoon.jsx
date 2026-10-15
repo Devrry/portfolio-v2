@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Mail, Wrench } from 'lucide-react'
-import { profile } from '../data'
-import { SocialLinks, fadeUp, stagger } from './ui'
+
+// Full-screen countdown only: no name, photo or hints about what's launching.
 
 function timeLeft(target) {
   const ms = Math.max(0, target - Date.now())
@@ -17,14 +16,14 @@ function timeLeft(target) {
 
 function Digit({ value }) {
   return (
-    <span className="relative inline-flex h-[1.1em] w-[0.62em] justify-center overflow-hidden">
+    <span className="relative inline-flex h-[1em] w-[0.62em] justify-center overflow-hidden">
       <AnimatePresence initial={false} mode="popLayout">
         <motion.span
           key={value}
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: '0%', opacity: 1 }}
           exit={{ y: '-100%', opacity: 0 }}
-          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="inline-block"
         >
           {value}
@@ -34,20 +33,37 @@ function Digit({ value }) {
   )
 }
 
-function Unit({ value, label }) {
-  const digits = String(value).padStart(2, '0').split('')
+function Unit({ value, label, index }) {
   return (
     <motion.div
-      variants={fadeUp}
-      className="flex flex-col items-center rounded-2xl border border-line bg-coal/80 px-3 py-4 backdrop-blur sm:min-w-28 sm:px-6 sm:py-6"
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.15 * index, ease: [0.22, 1, 0.36, 1] }}
+      className="flex flex-col items-center"
     >
-      <span className="flex text-4xl leading-none font-bold text-lemon tabular-nums sm:text-6xl">
-        {digits.map((d, i) => (
-          <Digit key={i} value={d} />
-        ))}
+      <span className="flex text-[28vw] leading-none font-bold tracking-tighter text-lemon tabular-nums sm:text-[14vw] lg:text-[12.5vw]">
+        {String(value)
+          .padStart(2, '0')
+          .split('')
+          .map((d, i) => (
+            <Digit key={i} value={d} />
+          ))}
       </span>
-      <span className="mt-2 font-mono text-[11px] tracking-widest text-mist uppercase sm:text-xs">{label}</span>
+      <span className="mt-2 font-mono text-xs tracking-[0.3em] text-mist uppercase sm:mt-4 sm:text-sm">{label}</span>
     </motion.div>
+  )
+}
+
+function Colon() {
+  return (
+    <motion.span
+      animate={{ opacity: [1, 0.2, 1] }}
+      transition={{ duration: 1, repeat: Infinity }}
+      className="hidden self-start text-[8vw] leading-[1.2] font-bold text-lemon/40 sm:block"
+      aria-hidden="true"
+    >
+      :
+    </motion.span>
   )
 }
 
@@ -74,86 +90,63 @@ export default function ComingSoon({ target, onLaunch }) {
     minute: '2-digit',
   })
 
+  const units = [
+    [left.days, 'Days'],
+    [left.hours, 'Hours'],
+    [left.minutes, 'Minutes'],
+    [left.seconds, 'Seconds'],
+  ]
+
   return (
-    <main className="relative flex min-h-svh flex-col overflow-hidden">
+    <main className="relative flex min-h-svh items-center justify-center overflow-hidden px-4">
       <div className="grid-bg pointer-events-none absolute inset-0" />
       <motion.div
-        animate={{ scale: [1, 1.15, 1], opacity: [0.25, 0.45, 0.25] }}
+        animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        className="pointer-events-none absolute top-1/3 left-1/2 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-lemon/20 blur-[140px]"
+        className="pointer-events-none absolute top-1/2 left-1/2 h-[70vmin] w-[70vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-lemon/20 blur-[140px]"
       />
 
-      <header className="relative mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-6 sm:px-6">
-        <img src={profile.logo} alt={profile.handle} className="h-8 w-auto" />
-        <a
-          href={`mailto:${profile.email}`}
-          className="inline-flex items-center gap-2 rounded-full bg-lemon px-5 py-2 text-sm font-semibold text-ink transition-transform hover:scale-105"
+      <div className="relative flex flex-col items-center py-12 text-center">
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-8 inline-flex items-center gap-2 rounded-full border border-lemon/30 bg-lemon/5 px-4 py-1.5 text-sm text-lemon sm:mb-10"
         >
-          <Mail size={16} /> Contact me
-        </a>
-      </header>
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lemon opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-lemon" />
+          </span>
+          New portfolio launching in
+        </motion.p>
 
-      <div className="relative mx-auto grid w-full max-w-6xl flex-1 items-center gap-10 px-4 pb-12 sm:px-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <motion.div variants={stagger(0.1)} initial="hidden" animate="show" className="text-center lg:text-left">
-          <motion.div
-            variants={fadeUp}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-lemon/30 bg-lemon/5 px-4 py-1.5 text-sm text-lemon"
-          >
-            <motion.span
-              animate={{ rotate: [0, -20, 20, 0] }}
-              transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 1 }}
-              className="inline-flex"
-            >
-              <Wrench size={15} />
-            </motion.span>
-            Upgrading my portfolio
-          </motion.div>
-
-          <motion.h1 variants={fadeUp} className="text-4xl leading-[1.1] font-bold tracking-tight sm:text-6xl">
-            Something <span className="text-lemon">new</span> is
-            <br className="hidden sm:block" /> coming soon.
-          </motion.h1>
-          <motion.p variants={fadeUp} className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-mist lg:mx-0">
-            I'm {profile.name}, a freelance full stack developer. I'm putting the finishing touches on my new
-            portfolio. It launches on <span className="text-white">{launch}</span>.
-          </motion.p>
-
-          <motion.div
-            variants={stagger(0.08)}
-            className="mt-10 grid grid-cols-4 gap-2 sm:inline-grid sm:gap-4"
-            role="timer"
-            aria-label={`${left.days} days, ${left.hours} hours, ${left.minutes} minutes left`}
-          >
-            <Unit value={left.days} label="Days" />
-            <Unit value={left.hours} label="Hours" />
-            <Unit value={left.minutes} label="Minutes" />
-            <Unit value={left.seconds} label="Seconds" />
-          </motion.div>
-
-          <motion.div variants={fadeUp} className="mt-10">
-            <p className="mb-4 text-sm text-mist">
-              Need a system or capstone project now? I'm still taking projects. Message me:
-            </p>
-            <SocialLinks socials={profile.socials} className="justify-center lg:justify-start" />
-          </motion.div>
-        </motion.div>
+        <div
+          role="timer"
+          aria-label={`${left.days} days, ${left.hours} hours, ${left.minutes} minutes, ${left.seconds} seconds left`}
+          className="grid grid-cols-2 gap-x-6 gap-y-8 sm:flex sm:items-start sm:gap-[2vw]"
+        >
+          {units.map(([value, label], i) => (
+            <div key={label} className="contents">
+              {i > 0 && <Colon />}
+              <Unit value={value} label={label} index={i} />
+            </div>
+          ))}
+        </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mx-auto hidden w-full max-w-sm lg:block"
+          transition={{ duration: 0.8, delay: 0.7 }}
+          className="mt-10 max-w-2xl sm:mt-14"
         >
-          <motion.div
-            animate={{ scale: [1, 1.04, 1] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute inset-x-4 top-[12%] bottom-0 rounded-t-full bg-gradient-to-b from-lemon via-lemon/70 to-lemon/0"
-          />
-          <img
-            src={profile.photo}
-            alt={profile.name}
-            className="relative mx-auto h-[540px] w-auto [mask-image:linear-gradient(to_bottom,black_70%,transparent)]"
-          />
+          <h1 className="text-2xl font-bold tracking-tight sm:text-4xl">
+            A freelance full stack developer is <span className="text-lemon">getting ready.</span>
+          </h1>
+          <p className="mt-4 text-base leading-relaxed text-mist sm:text-lg">
+            When the timer hits zero, a brand-new portfolio goes live, featuring custom business systems, websites
+            and capstone projects for clients across the Philippines. See you on{' '}
+            <span className="text-white">{launch}</span>.
+          </p>
         </motion.div>
       </div>
     </main>

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion'
 import { launchDate } from './data'
 import ComingSoon from './components/ComingSoon'
@@ -36,9 +36,22 @@ function Site() {
   )
 }
 
+// index.html ships a neutral "Coming soon" title/icon; the real ones appear only after launch.
+function revealHead() {
+  document.title = 'Larry Lopez (devrry) — Full Stack Developer'
+  document.querySelector('link[rel="icon"]')?.setAttribute('href', '/favicon.png')
+  document
+    .querySelector('meta[name="description"]')
+    ?.setAttribute('content', 'Larry Lopez (devrry) — freelance full stack developer from Talavera, Nueva Ecija, Philippines')
+}
+
 export default function App() {
   const [launched, setLaunched] = useState(() => preview || Date.now() >= launchAt)
   const onLaunch = useCallback(() => setLaunched(true), [])
+
+  useEffect(() => {
+    if (launched) revealHead()
+  }, [launched])
 
   return (
     <MotionConfig reducedMotion="user">
